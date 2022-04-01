@@ -10,14 +10,14 @@ container.setAttribute("style", "margin: 0; height: 100%; display: flex; backgro
 body.appendChild(container);
 
 const calculator = document.createElement('div');
-calculator.setAttribute("style", "display: flex; border: 1px black solid; border-radius: 25px; max-width: 300px; min-width: 300px; min-height: 500px; flex-wrap: wrap; background: gray; justify-content: center; align-items: center;")
+calculator.setAttribute("style", "display: flex; flex-wrap: wrap-reverse; border: 1px black solid; border-radius: 25px; max-width: 350px; min-width: 350px; min-height: 500px; flex-wrap: wrap; background: gray; justify-content: center; align-items: center;")
 container.appendChild(calculator);
 
 let result = "";
 
 const screen = document.createElement('div');
 screen.classList.add("screen");
-screen.setAttribute("style", "display: flex; border-radius: 10px; border: 1px black solid; font-size: 48px; background: lightgray; text-align: center; box-sizing: border-box; min-height: 97px; justify-content: center; color: black; margin: 20px; padding: 20px; min-width: 250px;");
+screen.setAttribute("style", "display: flex; border-radius: 10px; border: 1px black solid; font-size: 32px; background: lightgray; text-align: center; box-sizing: border-box; min-height: 114px; justify-content: center; color: black; margin: 20px; padding: 20px; min-width: 310px;");
 screen.innerText = "";
 calculator.appendChild(screen);
 
@@ -29,7 +29,6 @@ let checkForEnter = false;
 let operators = [
     {"symbol": " + ",
     "function" : function add () {
-
         result = parseFloat(userInput[0]) + parseFloat(userInput[1]);
         updateScreen();
 
@@ -39,7 +38,6 @@ let operators = [
 
     {"symbol" : " - ",
     "function" : function subtract () {
-
         result = parseFloat(userInput[0]) - parseFloat(userInput[1]);
         console.log(result);
         updateScreen();
@@ -48,9 +46,7 @@ let operators = [
     
     }},
     {"symbol" : " / " ,
-    "function" : 
-    function divide () {
-
+    "function" : function divide () {
         result = userInput[0] / userInput[1];
         console.log(result);
         updateScreen();
@@ -108,7 +104,7 @@ function updateScreen () {
 function createButtons () {
 
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 9; i > -1; i--) {
     const button = document.createElement('button');
     button.setAttribute("style", "margin: 10px; border-radius: 10px; font-size: 24px; min-height: 50px; min-width: 75px;")
     calculator.appendChild(button);
