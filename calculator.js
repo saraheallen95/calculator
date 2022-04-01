@@ -10,13 +10,14 @@ container.setAttribute("style", "margin: 0; height: 100%; display: flex; backgro
 body.appendChild(container);
 
 const calculator = document.createElement('div');
-calculator.setAttribute("style", "display: flex; max-width: 200px; min-width: 200px; flex-wrap: wrap; background: gray; justify-content: center; align-items: center;")
+calculator.setAttribute("style", "display: flex; border-radius: 25px; max-width: 300px; min-width: 300px; min-height: 500px; flex-wrap: wrap; background: gray; justify-content: center; align-items: center;")
 container.appendChild(calculator);
 
 let result = "";
 
 const screen = document.createElement('div');
-screen.setAttribute("style", "display: flex; background: lightgray; text-align: center; box-sizing: border-box; min-height: 38px; justify-content: center; color: black; margin: 20px; padding: 10px; min-width: 150px;");
+screen.classList.add("screen");
+screen.setAttribute("style", "display: flex; font-size: 48px; background: lightgray; text-align: center; box-sizing: border-box; min-height: 95px; justify-content: center; color: black; margin: 20px; padding: 20px; min-width: 250px;");
 screen.innerText = "";
 calculator.appendChild(screen);
 
@@ -109,7 +110,7 @@ function createButtons () {
 
     for (let i = 0; i < 10; i++) {
     const button = document.createElement('button')
-    button.setAttribute("style", "margin: 10px;")
+    button.setAttribute("style", "margin: 10px; border-radius: 10px; font-size: 24px; min-height: 30px; min-width: 50px;")
     calculator.appendChild(button);
     button.innerText = i;
 
@@ -130,7 +131,7 @@ function createButtons () {
 
     for (let j = 0; j < operators.length; j++) {
             const button = document.createElement('button')
-            button.setAttribute("style", "margin: 10px;")
+            button.setAttribute("style", "margin: 10px; border-radius: 10px; font-size: 24px; min-height: 30px; min-width: 50px;")
             calculator.appendChild(button);
             button.innerText = operators[j].symbol;
             button.onclick = function () {
@@ -148,6 +149,7 @@ function createButtons () {
     function createEnterBtn() {
         const enter = document.createElement("button");
         enter.innerText = "Enter";
+        enter.setAttribute("style", "margin: 10px; border-radius: 10px; font-size: 24px; min-height: 30px; min-width: 50px;");
         calculator.appendChild(enter);
         enter.onclick = function () {
 
@@ -175,6 +177,7 @@ function createButtons () {
         const clear = document.createElement("button");
         calculator.appendChild(clear);
         clear.innerText = "Clear";
+        clear.setAttribute("style", "margin: 10px; border-radius: 10px; font-size: 24px; min-height: 30px; min-width: 50px;");
         clear.onclick = function clearScreen () {
     
             clearArgsArray();
@@ -252,19 +255,23 @@ function errorCheck () {
         if (checkForEnter == false) {
     
         console.log("error");
-        screen.innerText = "Error! Please clear.";
+        screen.innerText = "Error!";
+        window.alert("Error! Please clear and try again.")
 
         error = true;
 
         clearArgsArray();
         clearOpsArray();
 
-        return;
+        return true;
         }
     }
 
-    else return;
+    else {
+        
+        return false;}
 }
+
 
 /*
 
