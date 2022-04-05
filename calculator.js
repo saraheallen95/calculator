@@ -1,287 +1,297 @@
+//
 
-const html = document.getElementsByTagName("html")[0];
-html.setAttribute("style", "margin: 0; padding: 0; height: 100%; color: pink;");
+function test(operators) {
+  const el = document.createElement("pre");
+  el.style.color = "black";
+  document.body.appendChild(el);
+  function log(text) {
+    el.innerText += `\n${text}`;
+  }
 
-const body = document.getElementsByTagName("body")[0];
-body.setAttribute("style", "margin: 0; padding: 0; height: 100%; color: pink;");
-
-const container = document.createElement('div');
-container.setAttribute("style", "margin: 0; height: 100%; display: flex; background: pink; justify-content: center; flex-direction: column; flex: 1; align-items: center;")
-body.appendChild(container);
-
-const calculator = document.createElement('div');
-calculator.setAttribute("style", "display: flex; flex-wrap: wrap-reverse; border: 1px black solid; border-radius: 25px; max-width: 350px; min-width: 350px; min-height: 500px; flex-wrap: wrap; background: gray; justify-content: center; align-items: center;")
-container.appendChild(calculator);
-
-let result = "";
-
-const screen = document.createElement('div');
-screen.classList.add("screen");
-screen.setAttribute("style", "display: flex; border-radius: 10px; border: 1px black solid; font-size: 32px; background: lightgray; text-align: center; box-sizing: border-box; min-height: 114px; justify-content: center; color: black; margin: 20px; padding: 20px; min-width: 310px;");
-screen.innerText = "";
-calculator.appendChild(screen);
-
-let userInput = [];
-let currentOp = [];
-
-let checkForEnter = false;
-
-let operators = [
-    {"symbol": " + ",
-    "function" : function add () {
-        result = parseFloat(userInput[0]) + parseFloat(userInput[1]);
-        updateScreen();
-
-        return result;
-
-    }},
-
-    {"symbol" : " - ",
-    "function" : function subtract () {
-        result = parseFloat(userInput[0]) - parseFloat(userInput[1]);
-        console.log(result);
-        updateScreen();
-
-        return result;
-    
-    }},
-    {"symbol" : " / " ,
-    "function" : function divide () {
-        result = userInput[0] / userInput[1];
-        console.log(result);
-        updateScreen();
-
-        return result;
-    
-    }},
-    {"symbol" : "*",
-    "function" : function multiply () {
-        result = userInput[0] * userInput[1];
-        console.log(currentOp);
-        console.log(result);
-        updateScreen();
-
-        return result;
-    
-    }}
-]
-
-createButtons();
-
-function updateScreen () {
-
-    errorCheck();
-
-    if (error == false) {
-
-        index = currentOp[0];
-
-        if (checkForEnter == true) {
-            screen.innerText += " = " + result;
-
-        }
-
-        else if (userInput[1] != undefined) {
-            console.log('if statement 1');
-            screen.innerText = userInput[0] + " " + operators[index].symbol + " " + userInput[1];
-        }
-
-        else if (currentOp[0] != undefined) {
-            console.log('if statement 2');
-
-            screen.innerText = userInput[0] + " " + operators[index].symbol;
-        }
-        else {
-            console.log('if statement 3');
-
-            screen.innerText = userInput[0];
-        }
+  function assert(assertion, message) {
+    if (!assertion) {
+      log(message);
     }
+  }
 
-    else return;
+  function assertEqual(a, b, message) {
+    assert(a == b, a + " != " + b + ": " + message);
+  }
+
+  assert(1 + 1 == 2, "Math is wrong");
+
+  assert(operators["+"], "addition should exist");
+  assert(operators["-"], "subtraction should exist");
+  assert(operators["/"], "division should exist");
+  assert(operators["*"], "multiplication should exist");
+
+  /*assertEqual(roundResult(1.1112), 1.12, "should round to 1.12");
+  assertEqual(roundResult(10), 10, "should not round");*/
+
+  assertEqual(operators["+"].function(4, 3), 7, "addition should work");
+  assertEqual(operators["*"].function(4, 3), 12, "multiplication should work");
+  assertEqual(operators["-"].function(4, 3), 1, "subtraction should work");
+  assertEqual(operators["/"].function(12, 3), 4, "division should work");
 }
 
-function createButtons () {
+function main() {
+  // This is where your program begins.
 
+  const html = document.getElementsByTagName("html")[0];
+  html.setAttribute(
+    "style",
+    "margin: 0; padding: 0; height: 100%; color: pink;"
+  );
 
+  const body = document.getElementsByTagName("body")[0];
+  body.setAttribute(
+    "style",
+    "margin: 0; padding: 0; height: 100%; color: pink;"
+  );
+
+  const container = document.createElement("div");
+  container.setAttribute(
+    "style",
+    "margin: 0; height: 100%; display: flex; background: pink; justify-content: center; flex-direction: column; flex: 1; align-items: center;"
+  );
+  body.appendChild(container);
+
+  const calculator = document.createElement("div");
+  calculator.setAttribute(
+    "style",
+    "display: flex; flex-wrap: wrap-reverse; border: 1px black solid; border-radius: 25px; max-width: 350px; min-width: 350px; min-height: 500px; flex-wrap: wrap; background: gray; justify-content: center; align-items: center;"
+  );
+  container.appendChild(calculator);
+
+  const screen = document.createElement("div");
+  screen.classList.add("screen");
+  screen.setAttribute(
+    "style",
+    "display: flex; border-radius: 10px; border: 1px black solid; font-size: 32px; background: lightgray; text-align: center; box-sizing: border-box; min-height: 114px; max-height: 114px; justify-content: center; color: black; margin: 20px; padding: 20px; max-width: 310px; min-width: 310px;"
+  );
+  screen.innerText = "";
+  calculator.appendChild(screen);
+
+  const enterClearContainer = document.createElement("div");
+  calculator.appendChild(enterClearContainer);
+  enterClearContainer.appendChild(createEnterBtn());
+  enterClearContainer.appendChild(createClearBtn());
+
+  const operators = createOperatorsDictionary();
+
+  let eq = { a: null, b: null, op: null, result: null };
+  console.log(eq);
+  createOperators(operators);
+  createNumberKeys();
+
+  createEnterBtn();
+  createClearBtn();
+  test(operators);
+
+  function createOperatorsDictionary() {
+    let operators = {
+      "+": {
+        symbol: "+",
+        position: 0,
+        function: function add(a, b) {
+          let result = a + b;
+          return result;
+        },
+      },
+
+      "-": {
+        symbol: "-",
+        position: 1,
+        function: function subtract(a, b) {
+          let result = a - b;
+          console.log(result);
+          return result;
+        },
+      },
+      "/": {
+        symbol: "/",
+        position: 2,
+        function: function divide(a, b) {
+          let result = a / b;
+          console.log(result);
+          return result;
+        },
+      },
+      "*": {
+        symbol: "*",
+        position: 3,
+        function: function multiply(a, b) {
+          let result = a * b;
+          console.log(result);
+          return result;
+        },
+      },
+    };
+    return operators;
+  }
+
+  function createOperators(operators) {
+    const operator = document.createElement("operator");
+
+    for (const [key, value] of Object.entries(operators)) {
+      //for (let j = 0; j < operators.length; j++) {
+      const button = document.createElement("button");
+      button.setAttribute(
+        "style",
+        "background-color: #778899; margin: 10px; border-radius: 10px; font-size: 24px; min-height: 50px; min-width: 75px;"
+      );
+      calculator.appendChild(button);
+      button.innerText = key;
+
+      button.onclick = function () {
+        console.log(eq);
+        let enterCheck = false;
+
+        if (eq.op == null) {
+          eq.op = key;
+          updateScreen(enterCheck, key, screen);
+        } else {
+          updateScreen(enterCheck, key, screen);
+
+          let result = calculateResult(eq);
+          resetEquation(eq);
+          eq.op = key;
+          eq.a = result;
+        }
+      };
+    }
+  }
+
+  function createNumberKeys() {
     for (let i = 9; i > -1; i--) {
-    const button = document.createElement('button');
-    button.setAttribute("style", "margin: 10px; border-radius: 10px; font-size: 24px; min-height: 50px; min-width: 75px;")
-    calculator.appendChild(button);
-    button.innerText = i;
+      const button = document.createElement("button");
+      button.setAttribute(
+        "style",
+        "margin: 10px; border-radius: 10px; font-size: 24px; min-height: 50px; min-width: 75px;"
+      );
+      calculator.appendChild(button);
+      button.innerText = i;
 
-    button.onclick = function () {
-        errorCheck();
-        if (error == false) {
-            addArgsToArray(button.innerText);
-             updateScreen();
-            console.log(userInput);
+      button.onclick = function () {
+        let enterCheck = false;
+        //eq.a = i;
+        console.log(eq);
+        eq = addToEquation(eq, i);
+        //console.log(addToEquation(eq, i));
+        console.log(eq);
+        updateScreen(enterCheck, i, screen);
+      };
+    }
+  }
+
+  function updateScreen(enterCheck, input, screen) {
+    let string = screen.innerText;
+    if (input != undefined) {
+      if (!string.includes("=")) {
+        if (enterCheck == true) {
+          screen.innerText += " = " + input;
+        } else {
+          screen.innerText += input;
         }
+      }
+    } else {
+      screen.innerText = "Error! Clear and try again.";
     }
 
+    return;
+  }
+  function addToEquation(eq, i) {
+    if (eq.a == null) {
+      eq.a = i;
+    } else if (eq.op == null) {
+      eq.a = eq.a * 10 + i;
+    } else if (eq.b == null) {
+      eq.b = i;
+    } else {
+      eq.b = eq.b * 10 + i;
     }
+    return eq;
+  }
 
-   
+  function calculateResult(eq) {
+    let result = 0;
 
-    const operator = document.createElement('operator');
-
-    for (let j = 0; j < operators.length; j++) {
-            const button = document.createElement('button')
-            button.setAttribute("style", "margin: 10px; border-radius: 10px; font-size: 24px; min-height: 50px; min-width: 75px;")
-            calculator.appendChild(button);
-            button.innerText = operators[j].symbol;
-            button.onclick = function () {
-            currentOp.push(j);
-            updateScreen();
-
+    if (eq.op) {
+      {
+        result = operators[eq.op].function(parseFloat(eq.a), parseFloat(eq.b));
+        if (Number.isFinite(result)) {
+          console.log("result is finite");
+          return roundResult(result);
+        } else {
+          errorMsg("Clear and try again!");
         }
-        console.log(operator);
+      }
+    } else {
+      errorMsg("Clear and try again!");
+      return;
     }
+    /* if (eq.result == null) {
+      console.log("eq.result == null");
+      result = operators[eq.op].function(parseFloat(eq.a), parseFloat(eq.b));
+    } else {
+      result = operators[eq.op].function(parseFloat(eq.a), parseFloat(eq.b));
+    }*/
+    //eq.enter = true;
+  }
+  function resetEquation(eq) {
+    eq.a = null;
+    eq.b = null;
+    eq.op = null;
+    return eq;
+  }
 
-    const enterClearContainer = document.createElement('div');
-    calculator.appendChild(enterClearContainer);
+  function createEnterBtn() {
+    const enterBtn = document.createElement("button");
+    enterBtn.innerText = "Enter";
+    enterBtn.setAttribute(
+      "style",
+      "margin: 20px; border-radius: 10px; font-size: 32px; min-height: 30px; min-width: 100px;"
+    );
+    enterBtn.onclick = function () {
+      let enterCheck = true;
+      updateScreen(enterCheck, calculateResult(eq), screen);
+      resetEquation(eq);
+    };
+    return enterBtn;
+  }
 
-    createEnterBtn();
-    createClearBtn();
-
-    function createEnterBtn() {
-        const enter = document.createElement("button");
-        enter.innerText = "Enter";
-        enter.setAttribute("style", "margin: 20px; border-radius: 10px; font-size: 32px; min-height: 30px; min-width: 100px;");
-        enterClearContainer.appendChild(enter);
-        enter.onclick = function () {
-
-            console.log(currentOp.length);
-
-                if (error == false) {
-
-                    if (checkForEnter == false) {
-
-                        result = operators[currentOp[0]].function();
-                        clearArgsArray();
-                        clearOpsArray();
-                        checkForEnter = true;
-                        updateScreen();
-                        return;
-                    }
-                }
-        
-                else return;
-        }
-    
+  function roundResult(result) {
+    if (result.toString().split(".")[1]) {
+      return result.toFixed(2);
+    } else {
+      return result;
     }
-    
-    function createClearBtn() {
-        const clear = document.createElement("button");
-        enterClearContainer.appendChild(clear);
-        clear.innerText = "Clear";
-        clear.setAttribute("style", "margin: 20px; border-radius: 10px; font-size: 32px; min-height: 30px; min-width: 100px;");
-        clear.onclick = function clearScreen () {
-    
-            clearArgsArray();
-            clearOpsArray();
-            error = false;
-            checkForEnter = false;
-            screen.innerText = "";
-        
-        }
-    }
+  }
 
+  function createClearBtn(enterClearContainer) {
+    const clearBtn = document.createElement("button");
+    clearBtn.innerText = "Clear";
+    clearBtn.setAttribute(
+      "style",
+      "margin: 20px; border-radius: 10px; font-size: 32px; min-height: 30px; min-width: 100px;"
+    );
+    clearBtn.onclick = function () {
+      resetEquation(eq);
+      eq.result = null;
+      eq.enter = false;
+      screen.innerText = "";
+    };
+    return clearBtn;
+  }
+  function errorCheck(string) {
+    let result = string.includes("=");
+    return result;
+  }
+
+  function errorMsg(string) {
+    window.alert(string);
+
+    return;
+  }
 }
-
-
-
-function addArgsToArray(input) {
-
-    if (currentOp.length == 0) {
-
-        for (let i = 0; i < userInput.length; i++) {
-            input = userInput[i] + input;
-        }
-
-        console.log("input is " + input)
-
-        clearArgsArray();
-
-        userInput.push(input);
-
-    }
-
-    else if (currentOp.length == 1) {
-            for (let i = 1; i < userInput.length; i++) {
-            
-            input = userInput[1] + input;
-    
-            
-            }
-            userInput.splice(1, 1);
-            userInput.push(input);
-
-    }
-
-    else {
-
-        userInput.push(input);
-
-    }
-
-}
-
-
-function clearArgsArray () {
-
-    while (userInput.length > 0) {
-        userInput.pop();
-    }
-
-}
-
-function clearOpsArray () {
-
-    while (currentOp.length > 0) {
-        currentOp.pop();
-    }
-}
-
-let error = false;
-
-function errorCheck () {
-    console.log("currentOp length is" + currentOp.length)
-
-    if (currentOp.length > 1) {
-
-        if (checkForEnter == false) {
-    
-        console.log("error");
-        screen.innerText = "Error!";
-        window.alert("Error! Please clear and try again.")
-
-        error = true;
-
-        clearArgsArray();
-        clearOpsArray();
-
-        return true;
-        }
-    }
-
-    else {
-        
-        return false;}
-}
-
-
-/*
-
-Enter needs to be its own function
-
-I can access functions in my array from the Enter button, but I do need to be able to call them from the string value in the currentOp array
-
-I need to find the correct object in the array by index (or key) the call the value (AKA the function) when enter is pressed
-
-So, my onclick buttons should add a value to currentOp, not actually cause the function to run
-
-Only when I hit enter should the function actually run
-
-*/
-
+main();
