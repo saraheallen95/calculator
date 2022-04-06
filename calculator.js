@@ -135,7 +135,7 @@ function main() {
   screen.innerText = "";
   calculator.appendChild(screen);
 
-  let eq = { a: null, b: null, op: null };
+  let eq = new Equation();
 
   const enterClearContainer = document.createElement("div");
   calculator.appendChild(enterClearContainer);
@@ -161,33 +161,74 @@ function createOperators(calculator, eq, screen) {
     button.innerText = key;
     button.onclick = function () {
       let enterCheck = false;
-      let input = addOpsToEquation(eq, key);
+      let input = eq.addOpsToEquation(key);
       updateScreen(enterCheck, input, screen);
     };
   }
 }
-function addOpsToEquation(eq, key) {
-  let input;
-  if (!eq.a) {
-    //if an operator has been entered without any args, throws an error
-    input = undefined;
-  } else if (eq.op == null) {
-    //if no operator has been entered yet, pushes operator to eq.
-    eq.op = key;
-    input = " " + key;
-  } else if (!eq.b) {
-    //if operator exists but only one argument has been entered, throws an error.
-    input = undefined;
-  } else {
-    //if eq.a, eq.b, and eq.op exist, caculates the result, clears eq's properties, and pushes the result to eq.a.
-    input = " " + key + " ";
-    let result = calculateResult(eq);
-    resetEquation(eq);
-    eq.op = key;
-    eq.a = result;
+
+class Equation {
+  addOpsToEquation(key) {
+    let input;
+    if (!this.a) {
+      //if an operator has been entered without any args, throws an error
+      input = undefined;
+    } else if (this.op == null) {
+      //if no operator has been entered yet, pushes operator to eq.
+      this.op = key;
+      input = " " + key;
+    } else if (!this.b) {
+      //if operator exists but only one argument has been entered, throws an error.
+      input = undefined;
+    } else {
+      //if eq.a, eq.b, and eq.op exist, caculates the result, clears eq's properties, and pushes the result to eq.a.
+      input = " " + key + " ";
+      let result = this.calculateResult();
+      this.resetEquation();
+      this.op = key;
+      this.a = result;
+    }
+    return input;
   }
-  return input;
+
+  calculateResult() {
+    let result = 0;
+
+    if (this.op) {
+      {
+        result = operators[this.op].function(
+          parseFloat(this.a),
+          parseFloat(this.b)
+        );
+        if (Number.isFinite(result)) {
+          console.log("result is finite");
+          return roundResult(result);
+        } else {
+          return undefined;
+        }
+      }
+    } else {
+      return undefined;
+    }
+  }
+  addArgsToEquation(i) {
+    if (this.a == null) {
+      this.a = i;
+    } else if (this.op == null) {
+      this.a = this.a * 10 + i;
+    } else if (this.b == null) {
+      this.b = i;
+    } else {
+      this.b = this.b * 10 + i;
+    }
+  }
+  resetEquation() {
+    this.a = null;
+    this.b = null;
+    this.op = null;
+  }
 }
+
 function createNumberKeys(eq, calculator, screen) {
   for (let i = 9; i > -1; i--) {
     const button = document.createElement("button");
@@ -200,40 +241,12 @@ function createNumberKeys(eq, calculator, screen) {
 
     button.onclick = function () {
       let enterCheck = false;
-      eq = addArgsToEquation(eq, i);
+      eq.addArgsToEquation(i);
       updateScreen(enterCheck, i, screen);
     };
   }
 }
-function addArgsToEquation(eq, i) {
-  if (eq.a == null) {
-    eq.a = i;
-  } else if (eq.op == null) {
-    eq.a = eq.a * 10 + i;
-  } else if (eq.b == null) {
-    eq.b = i;
-  } else {
-    eq.b = eq.b * 10 + i;
-  }
-  return eq;
-}
-function calculateResult(eq) {
-  let result = 0;
 
-  if (eq.op) {
-    {
-      result = operators[eq.op].function(parseFloat(eq.a), parseFloat(eq.b));
-      if (Number.isFinite(result)) {
-        console.log("result is finite");
-        return roundResult(result);
-      } else {
-        return undefined;
-      }
-    }
-  } else {
-    return undefined;
-  }
-}
 function updateScreen(enterCheck, input, screen) {
   let string = screen.innerText;
   let lastChar = 0;
@@ -270,8 +283,8 @@ function createEnterBtn(eq, screen) {
   );
   enterBtn.onclick = function () {
     let enterCheck = true;
-    updateScreen(enterCheck, calculateResult(eq), screen);
-    resetEquation(eq);
+    updateScreen(enterCheck, eq.calculateResult(), screen);
+    eq.resetEquation();
   };
   return enterBtn;
 }
@@ -283,11 +296,6 @@ function roundResult(result) {
     return result;
   }
 }
-function resetEquation(eq) {
-  eq.a = null;
-  eq.b = null;
-  eq.op = null;
-}
 
 function createClearBtn(eq, screen) {
   const clearBtn = document.createElement("button");
@@ -297,7 +305,7 @@ function createClearBtn(eq, screen) {
     "margin: 20px; border-radius: 10px; font-size: 32px; min-height: 30px; min-width: 100px;"
   );
   clearBtn.onclick = function () {
-    resetEquation(eq);
+    eq.resetEquation();
     screen.innerText = "";
   };
   return clearBtn;
