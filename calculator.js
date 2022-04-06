@@ -135,38 +135,73 @@ function main() {
   screen.innerText = "";
   calculator.appendChild(screen);
 
-  let eq = new Equation();
+  const eq = new Equation();
 
   const enterClearContainer = document.createElement("div");
   calculator.appendChild(enterClearContainer);
-  enterClearContainer.appendChild(createEnterBtn(eq, screen));
-  enterClearContainer.appendChild(createClearBtn(eq, screen));
+  enterClearContainer.appendChild(
+    createFatKey("Enter", function () {
+      let enterCheck = true;
+      updateScreen(enterCheck, eq.calculateResult(), screen);
+      eq.resetEquation();
+    })
+  );
+  enterClearContainer.appendChild(
+    createFatKey("Clear", function () {
+      eq.resetEquation();
+      screen.innerText = "";
+    })
+  );
 
-  createOperators(calculator, eq, screen);
-  createNumberKeys(eq, calculator, screen);
+  const operatorKeys = createOperatorKeys(eq, screen);
+  for (const operatorKey of operatorKeys) {
+    calculator.appendChild(operatorKey);
+  }
 
+  const numberKeys = createNumberKeys(eq, screen);
+  for (const numberKey of numberKeys) {
+    calculator.appendChild(numberKey);
+  }
   test(operators);
 }
 
-function createOperators(calculator, eq, screen) {
-  const operator = document.createElement("operator");
+function createSkinnyKey(name, color, callback) {
+  const button = document.createElement("button");
+  button.setAttribute(
+    "style",
+    "margin: 10px; border-radius: 10px; font-size: 24px; min-height: 50px; min-width: 75px;"
+  );
+  button.style.backgroundColor = color;
+  button.innerText = name;
+  button.onclick = callback;
+  return button;
+}
 
+function createOperatorKeys(eq, screen) {
+  const buttons = [];
   for (const [key, operator] of Object.entries(operators)) {
-    const button = document.createElement("button");
-    button.setAttribute(
-      "style",
-      "background-color: #778899; margin: 10px; border-radius: 10px; font-size: 24px; min-height: 50px; min-width: 75px;"
-    );
-    calculator.appendChild(button);
-    button.innerText = key;
-    button.onclick = function () {
+    const button = createSkinnyKey(key, "#778899", function () {
       let enterCheck = false;
       let input = eq.addOpsToEquation(key);
       updateScreen(enterCheck, input, screen);
-    };
+    });
+    buttons.push(button);
   }
+  return buttons;
 }
+function createNumberKeys(eq, screen) {
+  const buttons = [];
+  for (let i = 9; i > -1; i--) {
+    const button = createSkinnyKey(i, "rgb(239, 239, 239)", function () {
+      let enterCheck = false;
+      eq.addArgsToEquation(i);
+      updateScreen(enterCheck, i, screen);
+    });
 
+    buttons.push(button);
+  }
+  return buttons;
+}
 class Equation {
   addOpsToEquation(key) {
     let input;
@@ -229,24 +264,6 @@ class Equation {
   }
 }
 
-function createNumberKeys(eq, calculator, screen) {
-  for (let i = 9; i > -1; i--) {
-    const button = document.createElement("button");
-    button.setAttribute(
-      "style",
-      "margin: 10px; border-radius: 10px; font-size: 24px; min-height: 50px; min-width: 75px;"
-    );
-    calculator.appendChild(button);
-    button.innerText = i;
-
-    button.onclick = function () {
-      let enterCheck = false;
-      eq.addArgsToEquation(i);
-      updateScreen(enterCheck, i, screen);
-    };
-  }
-}
-
 function updateScreen(enterCheck, input, screen) {
   let string = screen.innerText;
   let lastChar = 0;
@@ -274,19 +291,15 @@ function updateScreen(enterCheck, input, screen) {
     screen.innerText += input;
   }
 }
-function createEnterBtn(eq, screen) {
-  const enterBtn = document.createElement("button");
-  enterBtn.innerText = "Enter";
-  enterBtn.setAttribute(
+function createFatKey(name, callback) {
+  const key = document.createElement("button");
+  key.innerText = name;
+  key.setAttribute(
     "style",
     "margin: 20px; border-radius: 10px; font-size: 32px; min-height: 30px; min-width: 100px;"
   );
-  enterBtn.onclick = function () {
-    let enterCheck = true;
-    updateScreen(enterCheck, eq.calculateResult(), screen);
-    eq.resetEquation();
-  };
-  return enterBtn;
+  key.onclick = callback;
+  return key;
 }
 
 function roundResult(result) {
@@ -297,19 +310,6 @@ function roundResult(result) {
   }
 }
 
-function createClearBtn(eq, screen) {
-  const clearBtn = document.createElement("button");
-  clearBtn.innerText = "Clear";
-  clearBtn.setAttribute(
-    "style",
-    "margin: 20px; border-radius: 10px; font-size: 32px; min-height: 30px; min-width: 100px;"
-  );
-  clearBtn.onclick = function () {
-    eq.resetEquation();
-    screen.innerText = "";
-  };
-  return clearBtn;
-}
 function errorMsg(string) {
   window.alert(string);
 }
