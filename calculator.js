@@ -104,7 +104,6 @@ function main() {
         position: 1,
         function: function subtract(a, b) {
           let result = a - b;
-          console.log(result);
           return result;
         },
       },
@@ -113,7 +112,6 @@ function main() {
         position: 2,
         function: function divide(a, b) {
           let result = a / b;
-          console.log(result);
           return result;
         },
       },
@@ -122,7 +120,6 @@ function main() {
         position: 3,
         function: function multiply(a, b) {
           let result = a * b;
-          console.log(result);
           return result;
         },
       },
@@ -142,22 +139,26 @@ function main() {
       );
       calculator.appendChild(button);
       button.innerText = key;
-
+      let input = "";
+      let result = "";
       button.onclick = function () {
         console.log(eq);
         let enterCheck = false;
-
-        if (eq.op == null) {
+        if (!eq.a) {
+          input = undefined;
+        } else if (eq.op == null) {
           eq.op = key;
-          updateScreen(enterCheck, key, screen);
+          input = " " + key;
+        } else if (!eq.b) {
+          input = undefined;
         } else {
-          updateScreen(enterCheck, key, screen);
-
-          let result = calculateResult(eq);
+          input = " " + key + " ";
+          result = calculateResult(eq);
           resetEquation(eq);
           eq.op = key;
           eq.a = result;
         }
+        updateScreen(enterCheck, input, screen);
       };
     }
   }
@@ -174,11 +175,7 @@ function main() {
 
       button.onclick = function () {
         let enterCheck = false;
-        //eq.a = i;
-        console.log(eq);
         eq = addToEquation(eq, i);
-        //console.log(addToEquation(eq, i));
-        console.log(eq);
         updateScreen(enterCheck, i, screen);
       };
     }
@@ -186,18 +183,20 @@ function main() {
 
   function updateScreen(enterCheck, input, screen) {
     let string = screen.innerText;
-    if (input != undefined) {
-      if (!string.includes("=")) {
-        if (enterCheck == true) {
-          screen.innerText += " = " + input;
-        } else {
-          screen.innerText += input;
-        }
-      }
-    } else {
-      screen.innerText = "Error! Clear and try again.";
-    }
+    let index = string.length - 1;
+    let lastChar = string[index];
 
+    if (input == undefined) {
+      screen.innerText = "Error! Clear and try again.";
+      return;
+    } else if (string.includes("=")) {
+      screen.innerText = "Error! Clear and try again.";
+      return;
+    } else if (enterCheck == true) {
+      screen.innerText += " = " + input;
+    } else {
+      screen.innerText += input;
+    }
     return;
   }
   function addToEquation(eq, i) {
@@ -230,13 +229,6 @@ function main() {
       errorMsg("Clear and try again!");
       return;
     }
-    /* if (eq.result == null) {
-      console.log("eq.result == null");
-      result = operators[eq.op].function(parseFloat(eq.a), parseFloat(eq.b));
-    } else {
-      result = operators[eq.op].function(parseFloat(eq.a), parseFloat(eq.b));
-    }*/
-    //eq.enter = true;
   }
   function resetEquation(eq) {
     eq.a = null;
@@ -283,11 +275,6 @@ function main() {
     };
     return clearBtn;
   }
-  function errorCheck(string) {
-    let result = string.includes("=");
-    return result;
-  }
-
   function errorMsg(string) {
     window.alert(string);
 
