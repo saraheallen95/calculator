@@ -1,6 +1,6 @@
 //
 
-function test(operators)) {
+function test(operators) {
   const el = document.createElement("pre");
   el.style.color = "black";
   document.body.appendChild(el);
@@ -32,7 +32,7 @@ function test(operators)) {
   assertEqual(operators["*"].function(4, 3), 12, "multiplication should work");
   assertEqual(operators["-"].function(4, 3), 1, "subtraction should work");
   assertEqual(operators["/"].function(12, 3), 4, "division should work");
-  
+
   /*let eq1 = { a: 10, b: 10, op: "*" };
   assertEqual(
     calculateResult(eq1),
