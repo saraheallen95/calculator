@@ -79,7 +79,7 @@ function main() {
 
   const operators = createOperatorsDictionary();
 
-  let eq = { a: null, b: null, op: null, result: null };
+  let eq = { a: null, b: null, op: null };
   console.log(eq);
   createOperators(operators);
   createNumberKeys();
@@ -145,15 +145,19 @@ function main() {
         console.log(eq);
         let enterCheck = false;
         if (!eq.a) {
+          //if an operator has been entered without any args, throws an error
           input = undefined;
         } else if (eq.op == null) {
+          //if no operator has been entered yet, pushes operator to eq.
           eq.op = key;
           input = " " + key;
         } else if (!eq.b) {
+          //if operator exists but only one argument has been entered, throws an error.
           input = undefined;
         } else {
+          //if eq.a, eq.b, and eq.op exist, caculates the result, clears eq's properties, and pushes the result to eq.a.
           input = " " + key + " ";
-          result = calculateResult(eq);
+          let result = calculateResult(eq);
           resetEquation(eq);
           eq.op = key;
           eq.a = result;
@@ -163,6 +167,27 @@ function main() {
     }
   }
 
+  function addOpsToEquation(eq, key) {
+    if (!eq.a) {
+      //if an operator has been entered without any args, throws an error
+      input = undefined;
+    } else if (eq.op == null) {
+      //if no operator has been entered yet, pushes operator to eq.
+      eq.op = key;
+      input = " " + key;
+    } else if (!eq.b) {
+      //if operator exists but only one argument has been entered, throws an error.
+      input = undefined;
+    } else {
+      //if eq.a, eq.b, and eq.op exist, caculates the result, clears eq's properties, and pushes the result to eq.a.
+      input = " " + key + " ";
+      let result = calculateResult(eq);
+      resetEquation(eq);
+      eq.op = key;
+      eq.a = result;
+    }
+    return eq;
+  }
   function createNumberKeys() {
     for (let i = 9; i > -1; i--) {
       const button = document.createElement("button");
@@ -175,7 +200,7 @@ function main() {
 
       button.onclick = function () {
         let enterCheck = false;
-        eq = addToEquation(eq, i);
+        eq = addArgsToEquation(eq, i);
         updateScreen(enterCheck, i, screen);
       };
     }
@@ -183,23 +208,37 @@ function main() {
 
   function updateScreen(enterCheck, input, screen) {
     let string = screen.innerText;
-    let index = string.length - 1;
-    let lastChar = string[index];
+    let lastChar = 0;
+
+    //finds last character entered by user.
+    if (string.length > 1) {
+      let index = string.length - 1;
+      lastChar = string[index];
+    }
 
     if (input == undefined) {
+      //if input is bad, throws an error
       screen.innerText = "Error! Clear and try again.";
       return;
     } else if (string.includes("=")) {
+      //if enter has already been pressed, throws an error
       screen.innerText = "Error! Clear and try again.";
       return;
     } else if (enterCheck == true) {
+      //if enter has been pressed, adds an equals sign and the result (called input)
       screen.innerText += " = " + input;
+    } else if (isNaN(lastChar)) {
+      //if the last char entered is an operator, adds a space after the operator.
+      screen.innerText += " " + input;
     } else {
+      //if the last char entered is a number, adds number without a space in between.
       screen.innerText += input;
     }
+
     return;
   }
-  function addToEquation(eq, i) {
+
+  function addArgsToEquation(eq, i) {
     if (eq.a == null) {
       eq.a = i;
     } else if (eq.op == null) {
@@ -222,12 +261,11 @@ function main() {
           console.log("result is finite");
           return roundResult(result);
         } else {
-          errorMsg("Clear and try again!");
+          return undefined;
         }
       }
     } else {
-      errorMsg("Clear and try again!");
-      return;
+      return undefined;
     }
   }
   function resetEquation(eq) {
@@ -269,8 +307,6 @@ function main() {
     );
     clearBtn.onclick = function () {
       resetEquation(eq);
-      eq.result = null;
-      eq.enter = false;
       screen.innerText = "";
     };
     return clearBtn;
