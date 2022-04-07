@@ -35,7 +35,7 @@ const operators = {
     },
   },
 };
-function test(operators) {
+function test(keys, screen) {
   const el = document.createElement("pre");
   el.style.color = "black";
   document.body.appendChild(el);
@@ -68,33 +68,42 @@ function test(operators) {
   assertEqual(operators["-"].function(4, 3), 1, "subtraction should work");
   assertEqual(operators["/"].function(12, 3), 4, "division should work");
 
-  /*let eq1 = { a: 10, b: 10, op: "*" };
-  assertEqual(
-    calculateResult(eq1),
-    100,
-    "CalculateResult should work with multiplication"
-  );
-  let eq2 = { a: 100, b: 10, op: "*" };
+  // Table driven test.
+  const tests = [
+    [2, 5, "*", 10],
+    [3, 4, "+", 7],
+    [10, 8, "-", 2],
+    [80, 4, "/", 20],
+  ];
 
-  assertEqual(
-    calculateResult(eq2),
-    10,
-    "CalculateResult should work with division"
-  );
+  for (const [a, b, op, want] of tests) {
+    const eq = new Equation(a, b, op);
+    const got = eq.calculateResult();
+    assertEqual(
+      got,
+      want,
+      `${a} ${op} ${b} should equal ${want} but was ${got}`
+    );
+  }
 
-  let eq3 = { a: 100, b: 10, op: "+" };
-  assertEqual(
-    calculateResult(eq3),
-    110,
-    "CalculateResult should work with addition"
-  );
+  function assertScreen(want) {
+    let got = screen.innerText;
+    assertEqual(want, got, "Screen should match");
+  }
 
-  let eq4 = { a: 100, b: 10, op: "-" };
-  assertEqual(
-    calculateResult(eq3),
-    90,
-    "CalculateResult should work with subtraction"
-  );*/
+  const keyTests = [
+    ["1", ["1"]],
+    ["1 + 4 = 5", ["1", "+", "4", "Enter"]],
+    ["100 / 2 = 50", ["1", "0", "0", "/", "2", "Enter"]],
+  ];
+  for (const [want, keysToPress] of keyTests) {
+    keys["Clear"]();
+    for (const keyToPress of keysToPress) {
+      keys[keyToPress]();
+    }
+    assertScreen(want);
+    keys["Clear"]();
+  }
 }
 
 function main() {
@@ -139,30 +148,33 @@ function main() {
 
   const enterClearContainer = document.createElement("div");
   calculator.appendChild(enterClearContainer);
+
+  const keys = {};
+
   enterClearContainer.appendChild(
-    createFatKey("Enter", function () {
+    createFatKey(keys, "Enter", function () {
       let enterCheck = true;
       updateScreen(enterCheck, eq.calculateResult(), screen);
       eq.resetEquation();
     })
   );
   enterClearContainer.appendChild(
-    createFatKey("Clear", function () {
+    createFatKey(keys, "Clear", function () {
       eq.resetEquation();
       screen.innerText = "";
     })
   );
 
-  const operatorKeys = createOperatorKeys(eq, screen);
+  const operatorKeys = createOperatorKeys(keys, eq, screen);
   for (const operatorKey of operatorKeys) {
     calculator.appendChild(operatorKey);
   }
 
-  const numberKeys = createNumberKeys(eq, screen);
+  const numberKeys = createNumberKeys(keys, eq, screen);
   for (const numberKey of numberKeys) {
     calculator.appendChild(numberKey);
   }
-  test(operators);
+  test(keys, screen);
 }
 
 function createSkinnyKey(name, color, callback) {
@@ -177,32 +189,52 @@ function createSkinnyKey(name, color, callback) {
   return button;
 }
 
-function createOperatorKeys(eq, screen) {
+function createFatKey(keys, name, callback) {
+  const key = document.createElement("button");
+  key.innerText = name;
+  key.setAttribute(
+    "style",
+    "margin: 20px; border-radius: 10px; font-size: 32px; min-height: 30px; min-width: 100px;"
+  );
+  key.onclick = callback;
+  keys[name] = callback;
+  return key;
+}
+function createOperatorKeys(keys, eq, screen) {
   const buttons = [];
-  for (const [key, operator] of Object.entries(operators)) {
-    const button = createSkinnyKey(key, "#778899", function () {
+  for (const [key, _operator] of Object.entries(operators)) {
+    const callback = function () {
       let enterCheck = false;
       let input = eq.addOpsToEquation(key);
       updateScreen(enterCheck, input, screen);
-    });
+    };
+    const button = createSkinnyKey(key, "#778899", callback);
+    keys[key] = callback;
     buttons.push(button);
   }
   return buttons;
 }
-function createNumberKeys(eq, screen) {
+function createNumberKeys(keys, eq, screen) {
   const buttons = [];
+
   for (let i = 9; i > -1; i--) {
-    const button = createSkinnyKey(i, "rgb(239, 239, 239)", function () {
+    const callback = function () {
       let enterCheck = false;
       eq.addArgsToEquation(i);
       updateScreen(enterCheck, i, screen);
-    });
-
+    };
+    const button = createSkinnyKey(i, "rgb(239, 239, 239)", callback);
+    keys[i] = callback;
     buttons.push(button);
   }
   return buttons;
 }
 class Equation {
+  constructor(a, b, op) {
+    this.a = a;
+    this.b = b;
+    this.op = op;
+  }
   addOpsToEquation(key) {
     let input;
     if (!this.a) {
@@ -291,16 +323,6 @@ function updateScreen(enterCheck, input, screen) {
     screen.innerText += input;
   }
 }
-function createFatKey(name, callback) {
-  const key = document.createElement("button");
-  key.innerText = name;
-  key.setAttribute(
-    "style",
-    "margin: 20px; border-radius: 10px; font-size: 32px; min-height: 30px; min-width: 100px;"
-  );
-  key.onclick = callback;
-  return key;
-}
 
 function roundResult(result) {
   if (result.toString().split(".")[1]) {
@@ -308,10 +330,6 @@ function roundResult(result) {
   } else {
     return result;
   }
-}
-
-function errorMsg(string) {
-  window.alert(string);
 }
 
 main();
