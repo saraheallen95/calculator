@@ -124,14 +124,15 @@ function main() {
   const container = document.createElement("div");
   container.setAttribute(
     "style",
-    "margin: 0; height: 100%; display: flex; background: pink; justify-content: center; flex-direction: column; flex: 1; align-items: center;"
+    "margin: 0; padding: 0; height: 100%; display: flex; background: pink; justify-content: center; flex-direction: column; flex: 1; align-items: center;"
   );
   body.appendChild(container);
 
   const calculator = document.createElement("div");
   calculator.setAttribute(
     "style",
-    "display: flex; flex-wrap: wrap-reverse; border: 1px black solid; border-radius: 25px; max-width: 350px; min-width: 350px; min-height: 500px; flex-wrap: wrap; background: gray; justify-content: center; align-items: center;"
+    "display: flex; overflow: hidden; border: 1px black solid; border-radius: 25px; padding: 20px; min-height: 66%; max-height: 80%; min-width: 468px; max-width: 33%; flex-wrap: wrap; background: gray; justify-content: center; align-items: center;"
+    //max-width: 400px; min-width: 400px;  min-height: 600px;
   );
   container.appendChild(calculator);
 
@@ -139,18 +140,65 @@ function main() {
   screen.classList.add("screen");
   screen.setAttribute(
     "style",
-    "display: flex; border-radius: 10px; border: 1px black solid; font-size: 32px; background: lightgray; text-align: center; box-sizing: border-box; min-height: 114px; max-height: 114px; justify-content: center; color: black; margin: 20px; padding: 20px; max-width: 310px; min-width: 310px;"
+    "display: flex; padding: 20px; overflow: hidden; border-radius: 10px; white-space: normal; overflow-wrap: break-word; word-wrap: break-word; word-break: break-all; word-break: break-word; hyphens: auto; border: 1px black solid; font-size: 32px; background: lightgray; text-align: center; box-sizing: border-box; justify-content: center; color: black; margin: -20px; max-height: 30%; min-height: 30%; min-width: 90%; max-width: 90%;"
   );
   screen.innerText = "";
   calculator.appendChild(screen);
+  const keys = {};
 
   const eq = new Equation();
 
+  const keypad = document.createElement("div");
+  keypad.setAttribute(
+    "style",
+    "display: flex; flex-direction: row; flex-wrap: wrap; max-width: 100%; margin-top: 5px; margin-bottom: 20px; max-height: 50%;"
+  );
+  calculator.appendChild(keypad);
+
+  const numberKeyColumn = document.createElement("div");
+  numberKeyColumn.setAttribute(
+    "style",
+    "max-width: 75%;"
+    //flex-direction: column
+  );
+  keypad.appendChild(numberKeyColumn);
+
+  const operatorKeyColumn = document.createElement("div");
+  operatorKeyColumn.setAttribute(
+    "style",
+    "display: flex; flex: 25%; min-width: 25%; flex-direction: column;"
+    //
+  );
+  keypad.appendChild(operatorKeyColumn);
+
+  const operatorKeys = createOperatorKeys(keys, eq, screen);
+  for (const operatorKey of operatorKeys) {
+    operatorKey.style.minHeight = "20%";
+    operatorKey.style.maxHeight = "20%";
+    operatorKey.style.minWidth = "75%";
+    operatorKey.style.maxWidth = "75%";
+
+    operatorKeyColumn.appendChild(operatorKey);
+  }
+  const numberKeys = createNumberKeys(keys, eq, screen);
+  for (const numberKey of numberKeys) {
+    numberKeyColumn.appendChild(numberKey);
+  }
+
   const enterClearContainer = document.createElement("div");
-  calculator.appendChild(enterClearContainer);
+  enterClearContainer.setAttribute(
+    "style",
+    "display: flex; margin-top: -20px;"
+  );
+  keypad.appendChild(enterClearContainer);
 
-  const keys = {};
-
+  enterClearContainer.appendChild(
+    createFatKey(keys, "0", function () {
+      let enterCheck = false;
+      eq.addArgsToEquation(0);
+      updateScreen(enterCheck, 0, screen);
+    })
+  );
   enterClearContainer.appendChild(
     createFatKey(keys, "Enter", function () {
       let enterCheck = true;
@@ -158,22 +206,13 @@ function main() {
       eq.resetEquation();
     })
   );
-  enterClearContainer.appendChild(
-    createFatKey(keys, "Clear", function () {
-      eq.resetEquation();
-      screen.innerText = "";
-    })
-  );
+  const clearKey = createFatKey(keys, "Clear", function () {
+    eq.resetEquation();
+    screen.innerText = "";
+  });
+  enterClearContainer.appendChild(clearKey);
+  //clearKey.style.minWidth = "300px";
 
-  const operatorKeys = createOperatorKeys(keys, eq, screen);
-  for (const operatorKey of operatorKeys) {
-    calculator.appendChild(operatorKey);
-  }
-
-  const numberKeys = createNumberKeys(keys, eq, screen);
-  for (const numberKey of numberKeys) {
-    calculator.appendChild(numberKey);
-  }
   test(keys, screen);
 }
 
@@ -181,8 +220,9 @@ function createSkinnyKey(name, color, callback) {
   const button = document.createElement("button");
   button.setAttribute(
     "style",
-    "margin: 10px; border-radius: 10px; font-size: 24px; min-height: 50px; min-width: 75px;"
+    "margin: 10px; border-radius: 10px; font-size: 24px; min-width: 25%; min-height: 20%; max-height: 20%; max-width: 25%;"
   );
+  //
   button.style.backgroundColor = color;
   button.innerText = name;
   button.onclick = callback;
@@ -192,9 +232,10 @@ function createSkinnyKey(name, color, callback) {
 function createFatKey(keys, name, callback) {
   const key = document.createElement("button");
   key.innerText = name;
+  //m
   key.setAttribute(
     "style",
-    "margin: 20px; border-radius: 10px; font-size: 32px; min-height: 30px; min-width: 100px;"
+    "display: flex; justify-content: center; align-content: center; align-items: center; align-text: center; margin: 9px; border-radius: 10px; margin-top: 10px; font-size: 32px; in-height: 50%; min-width: 33%;  min-height: 100%;"
   );
   key.onclick = callback;
   keys[name] = callback;
@@ -217,7 +258,7 @@ function createOperatorKeys(keys, eq, screen) {
 function createNumberKeys(keys, eq, screen) {
   const buttons = [];
 
-  for (let i = 9; i > -1; i--) {
+  for (let i = 9; i > 0; i--) {
     const callback = function () {
       let enterCheck = false;
       eq.addArgsToEquation(i);
@@ -309,7 +350,7 @@ function updateScreen(enterCheck, input, screen) {
   if (input == undefined) {
     //if input is bad, throws an error
     screen.innerText = "Error! Clear and try again.";
-  } else if (string.includes("=")) {
+  } else if (string.includes("=") || string.includes("Error")) {
     //if enter has already been pressed, throws an error
     screen.innerText = "Error! Clear and try again.";
   } else if (enterCheck == true) {
