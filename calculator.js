@@ -140,7 +140,7 @@ function main() {
   screen.classList.add("screen");
   screen.setAttribute(
     "style",
-    "display: flex; padding: 20px; overflow: hidden; border-radius: 10px; white-space: normal; overflow-wrap: break-word; word-wrap: break-word; word-break: break-all; word-break: break-word; hyphens: auto; border: 1px black solid; font-size: 32px; background: lightgray; text-align: center; box-sizing: border-box; justify-content: center; color: black; margin: 10px; max-height: 30%; min-height: 30%; min-width: 90%; max-width: 90%;"
+    "display: flex; padding: 20px; overflow: hidden; border-radius: 10px; white-space: normal; overflow-wrap: break-word; word-wrap: break-word; word-break: break-all; word-break: break-word; hyphens: auto; border: 1px black solid; font-size: 32px; background: lightgray; text-align: center; box-sizing: border-box; justify-content: center; color: black; margin: 10px; max-height: 30%; min-height: 30%; min-width: 100%; max-width: 100%;"
   );
   screen.innerText = "";
   calculator.appendChild(screen);
@@ -185,6 +185,14 @@ function main() {
     numberKeyColumn.appendChild(numberKey);
   }
 
+  numberKeyColumn.appendChild(
+    createFatKey(keys, "0", function () {
+      let enterCheck = false;
+      eq.addArgsToEquation(0);
+      updateScreen(enterCheck, 0, screen);
+    })
+  );
+
   const backspaceKey = createSkinnyKey("Dlt", "#778899", function () {
     let enterCheck = false;
     let string = screen.innerText;
@@ -195,19 +203,12 @@ function main() {
   });
   numberKeyColumn.appendChild(backspaceKey);
 
-  numberKeyColumn.appendChild(
-    createFatKey(keys, "0", function () {
-      let enterCheck = false;
-      eq.addArgsToEquation(0);
-      updateScreen(enterCheck, 0, screen);
-    })
-  );
-
   const enterKey = createFatKey(keys, "=", function () {
     let enterCheck = true;
     updateScreen(enterCheck, eq.calculateResult(), screen);
     eq.resetEquation();
   });
+  enterKey.style.backgroundColor = "#778899";
   numberKeyColumn.appendChild(enterKey);
 
   const clearKey = createFatKey(keys, "Clear", function () {
@@ -372,14 +373,14 @@ function updateScreen(enterCheck, input, screen) {
     lastChar = string[index];
   }
 
-  if (input == "backspace") {
-    screen.innerText = string.substr(0, string.length - 1);
+  if (string.includes("=") || string.includes("Error")) {
+    //if enter has already been pressed, throws an error
+    screen.innerText = "Error! Clear and try again.";
   } else if (input == undefined) {
     //if input is bad, throws an error
     screen.innerText = "Error! Clear and try again.";
-  } else if (string.includes("=") || string.includes("Error")) {
-    //if enter has already been pressed, throws an error
-    screen.innerText = "Error! Clear and try again.";
+  } else if (input == "backspace") {
+    screen.innerText = string.substr(0, string.length - 1);
   } else if (enterCheck == true) {
     //if enter has been pressed, adds an equals sign and the result (called input)
     screen.innerText += " = " + input;
