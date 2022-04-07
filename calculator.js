@@ -93,8 +93,8 @@ function test(keys, screen) {
 
   const keyTests = [
     ["1", ["1"]],
-    ["1 + 4 = 5", ["1", "+", "4", "Enter"]],
-    ["100 / 2 = 50", ["1", "0", "0", "/", "2", "Enter"]],
+    ["1 + 4 = 5", ["1", "+", "4", "="]],
+    ["100 / 2 = 50", ["1", "0", "0", "/", "2", "="]],
   ];
   for (const [want, keysToPress] of keyTests) {
     keys["Clear"]();
@@ -131,7 +131,7 @@ function main() {
   const calculator = document.createElement("div");
   calculator.setAttribute(
     "style",
-    "display: flex; overflow: hidden; border: 1px black solid; border-radius: 25px; padding: 20px; min-height: 66%; max-height: 80%; min-width: 468px; max-width: 33%; flex-wrap: wrap; background: gray; justify-content: center; align-items: center;"
+    "display: flex; overflow: hidden; border: 1px black solid; border-radius: 25px; padding: 35px; min-height: 66%; max-height: 80%; min-width: 468px; max-width: 33%; flex-wrap: wrap; background: gray; justify-content: center; align-items: center;"
     //max-width: 400px; min-width: 400px;  min-height: 600px;
   );
   container.appendChild(calculator);
@@ -140,7 +140,7 @@ function main() {
   screen.classList.add("screen");
   screen.setAttribute(
     "style",
-    "display: flex; padding: 20px; overflow: hidden; border-radius: 10px; white-space: normal; overflow-wrap: break-word; word-wrap: break-word; word-break: break-all; word-break: break-word; hyphens: auto; border: 1px black solid; font-size: 32px; background: lightgray; text-align: center; box-sizing: border-box; justify-content: center; color: black; margin: -20px; max-height: 30%; min-height: 30%; min-width: 90%; max-width: 90%;"
+    "display: flex; padding: 20px; overflow: hidden; border-radius: 10px; white-space: normal; overflow-wrap: break-word; word-wrap: break-word; word-break: break-all; word-break: break-word; hyphens: auto; border: 1px black solid; font-size: 32px; background: lightgray; text-align: center; box-sizing: border-box; justify-content: center; color: black; margin: 10px; max-height: 30%; min-height: 30%; min-width: 90%; max-width: 90%;"
   );
   screen.innerText = "";
   calculator.appendChild(screen);
@@ -185,33 +185,40 @@ function main() {
     numberKeyColumn.appendChild(numberKey);
   }
 
-  const enterClearContainer = document.createElement("div");
-  enterClearContainer.setAttribute(
-    "style",
-    "display: flex; margin-top: -20px;"
-  );
-  keypad.appendChild(enterClearContainer);
+  const backspaceKey = createSkinnyKey("Dlt", "#778899", function () {
+    let enterCheck = false;
+    let string = screen.innerText;
+    console.log(string);
+    eq.backspace(string);
+    let backspace = "backspace";
+    updateScreen(enterCheck, backspace, screen);
+  });
+  numberKeyColumn.appendChild(backspaceKey);
 
-  enterClearContainer.appendChild(
+  numberKeyColumn.appendChild(
     createFatKey(keys, "0", function () {
       let enterCheck = false;
       eq.addArgsToEquation(0);
       updateScreen(enterCheck, 0, screen);
     })
   );
-  enterClearContainer.appendChild(
-    createFatKey(keys, "Enter", function () {
-      let enterCheck = true;
-      updateScreen(enterCheck, eq.calculateResult(), screen);
-      eq.resetEquation();
-    })
-  );
+
+  const enterKey = createFatKey(keys, "=", function () {
+    let enterCheck = true;
+    updateScreen(enterCheck, eq.calculateResult(), screen);
+    eq.resetEquation();
+  });
+  numberKeyColumn.appendChild(enterKey);
+
   const clearKey = createFatKey(keys, "Clear", function () {
     eq.resetEquation();
     screen.innerText = "";
   });
-  enterClearContainer.appendChild(clearKey);
-  //clearKey.style.minWidth = "300px";
+  clearKey.style.minWidth = "75%";
+  clearKey.style.maxHeight = "20%";
+  clearKey.style.minHeight = "10%";
+  clearKey.style.margin = "30px 30px 30px";
+  calculator.appendChild(clearKey);
 
   test(keys, screen);
 }
@@ -233,9 +240,13 @@ function createFatKey(keys, name, callback) {
   const key = document.createElement("button");
   key.innerText = name;
   //m
+  /* key.setAttribute(
+    "style",
+    "display: flex; justify-content: center; align-content: center; align-items: center; align-text: center; margin: 25px; border-radius: 10px; font-size: 32px; in-height: 50%; min-width: 33%;  min-height: 100%;"
+  );*/
   key.setAttribute(
     "style",
-    "display: flex; justify-content: center; align-content: center; align-items: center; align-text: center; margin: 9px; border-radius: 10px; margin-top: 10px; font-size: 32px; in-height: 50%; min-width: 33%;  min-height: 100%;"
+    "margin: 10px; border-radius: 10px; font-size: 24px; min-width: 25%; min-height: 20%; max-height: 20%; max-width: 25%;"
   );
   key.onclick = callback;
   keys[name] = callback;
@@ -335,6 +346,20 @@ class Equation {
     this.b = null;
     this.op = null;
   }
+  backspace(string) {
+    if (string.length > 1) {
+      let index = string.length - 1;
+      console.log(string[index]);
+      let lastChar = string[index];
+      if (lastChar == this.a) {
+        this.a = null;
+      } else if (lastChar == this.b) {
+        this.b = null;
+      } else if (lastChar == this.op) {
+        this.op = null;
+      }
+    }
+  }
 }
 
 function updateScreen(enterCheck, input, screen) {
@@ -347,7 +372,9 @@ function updateScreen(enterCheck, input, screen) {
     lastChar = string[index];
   }
 
-  if (input == undefined) {
+  if (input == "backspace") {
+    screen.innerText = string.substr(0, string.length - 1);
+  } else if (input == undefined) {
     //if input is bad, throws an error
     screen.innerText = "Error! Clear and try again.";
   } else if (string.includes("=") || string.includes("Error")) {
