@@ -186,7 +186,7 @@ function main() {
   }
 
   numberKeyColumn.appendChild(
-    createFatKey(keys, "0", function () {
+    createSingleKey(keys, "0", function () {
       let enterCheck = false;
       eq.addArgsToEquation(0);
       updateScreen(enterCheck, 0, screen);
@@ -203,7 +203,7 @@ function main() {
   });
   numberKeyColumn.appendChild(backspaceKey);
 
-  const enterKey = createFatKey(keys, "=", function () {
+  const enterKey = createSingleKey(keys, "=", function () {
     let enterCheck = true;
     updateScreen(enterCheck, eq.calculateResult(), screen);
     eq.resetEquation();
@@ -211,7 +211,7 @@ function main() {
   enterKey.style.backgroundColor = "#778899";
   numberKeyColumn.appendChild(enterKey);
 
-  const clearKey = createFatKey(keys, "Clear", function () {
+  const clearKey = createSingleKey(keys, "Clear", function () {
     eq.resetEquation();
     screen.innerText = "";
   });
@@ -237,7 +237,7 @@ function createSkinnyKey(name, color, callback) {
   return button;
 }
 
-function createFatKey(keys, name, callback) {
+function createSingleKey(keys, name, callback) {
   const key = document.createElement("button");
   key.innerText = name;
   //m
